@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Home Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function sendCommand(cmd) {
+      fetch('/command', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("output").innerText = data.message;
+      });
+    }
+
+    function startVoiceCommand() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.onresult = function(event) {
+        const command = event.results[0][0].transcript;
+        document.getElementById("output").innerText = "Heard: " + command;
+        sendCommand(command);
+      };
+      recognition.start();
+    }
+  </script>
+</head>
+<body class="bg-gray-900 text-white p-6">
+  <h1 class="text-3xl font-bold mb-4">Smart Home Dashboard</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <button onclick="sendCommand('Turn on kitchen light')" class="bg-green-600 p-4 rounded-xl hover:bg-green-700 transition">Turn on Kitchen Light</button>
+    <button onclick="sendCommand('Turn off bedroom fan')" class="bg-red-600 p-4 rounded-xl hover:bg-red-700 transition">Turn off Bedroom Fan</button>
+    <button onclick="startVoiceCommand()" class="bg-purple-600 p-4 rounded-xl hover:bg-purple-700 transition">🎤 Voice Command</button>
+  </div>
+
+  <div id="output" class="text-lg bg-gray-800 p-4 rounded-xl text-center">System ready.</div>
+</body>
+</html>
